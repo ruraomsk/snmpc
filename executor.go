@@ -413,6 +413,10 @@ func registator(agent *agent.Agent) {
 		func(oid asn1.Oid, value any) (any, error) {
 			t := time.Unix(int64(getUint32(value)), 0)
 			journal.SendMessage(journal.LevelSMNP, fmt.Sprintf("%v Установить время дату %v %s", oid, value, t.String()))
+			err := SetSystemTimeFromUnix(int64(getUint32(value)))
+			if err != nil {
+				journal.SendMessage(journal.LevelSMNP, err.Error())
+			}
 			return value, nil
 		})
 	// 1.3.6.1.4.1.1618.3.7.2.2.3.0

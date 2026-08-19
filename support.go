@@ -3,8 +3,10 @@ package snmpc
 import (
 	"encoding/binary"
 	"fmt"
+	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/ruraomsk/potop/agent"
 	"github.com/ruraomsk/potop/hardware"
@@ -254,4 +256,19 @@ func (s *SnmpHard) GetSignalGroup() string {
 	// res = strings.TrimSuffix(res, "-")
 	return string(res)
 
+}
+
+func SetSystemTimeFromUnix(unixTime int64) error {
+	t := time.Unix(unixTime, 0)
+
+	// Формат для команды date: MMDDhhmmYYYY.ss
+	dateStr := t.Format("010215042006.05")
+
+	// Выполняем команду
+	cmd := exec.Command("date", dateStr)
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("не удалось установить время: %w", err)
+	}
+
+	return nil
 }
