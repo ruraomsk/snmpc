@@ -150,10 +150,20 @@ func senderTrapsSnmp() {
 				// logger.Debug.Printf("trap %v", v)
 				journal.SendMessage(journal.LevelSMNP, fmt.Sprintf("TRAP %v %v", v.Name, v.Value))
 			}
-			_, err := gtrap.Default.SendTrap(trap)
-			if err != nil {
-				logger.Error.Printf("SendTrap() err: %v", err)
-				return
+			count := 0
+			for {
+				_, err := gtrap.Default.SendTrap(trap)
+				if err != nil {
+					count++
+					if count > 100 {
+						return
+					}
+					logger.Error.Printf("SendTrap() err: %v", err)
+					time.Sleep(1 * time.Second)
+					continue
+				} else {
+					break
+				}
 			}
 		}
 		time.Sleep(500 * time.Millisecond)
