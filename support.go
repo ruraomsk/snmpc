@@ -179,8 +179,8 @@ func (s *SnmpHard) GetPromtaktInteger() int {
 	}
 	return 0
 }
-func (s *SnmpHard) GetPromtakt() agent.Unsigned32 {
-	return agent.Unsigned32(s.GetPromtaktInteger())
+func (s *SnmpHard) GetPromtakt() int {
+	return s.GetPromtaktInteger()
 }
 func getUint32(value any) agent.Unsigned32 {
 	v, _ := strconv.ParseInt(fmt.Sprintf("%v", value), 10, 64)
