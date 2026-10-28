@@ -151,12 +151,12 @@ func registator(agent *agent.Agent) {
 		func(oid asn1.Oid) (any, error) {
 			hs.Update()
 			journal.SendMessage(journal.LevelSMNP, fmt.Sprintf("%v Наличие промтакта %d", oid, int(hs.GetPromtakt())))
-			return int(hs.GetPromtakt()), nil
+			return hs.GetPromtakt(), nil
 		},
 		func(oid asn1.Oid, value any) (any, error) {
 			hs.Update()
 			journal.SendMessage(journal.LevelSMNP, fmt.Sprintf("%v Наличие промтакта %v", oid, value))
-			return int(hs.GetPromtakt()), nil
+			return hs.GetPromtakt(), nil
 		})
 	// case "1.3.6.1.4.1.1618.3.5.2.1.6.0":
 	//
