@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/ruraomsk/potop/agent"
@@ -13,11 +14,50 @@ import (
 )
 
 type SnmpHard struct {
+	mutex     sync.Mutex
 	StateHard hardware.StateHard
-	LastVPU   bool
+	LastVPU   bool //
+	BlockVPU  bool // Запрет ВПУ
+	Adaptiv   bool
+}
+
+func (s *SnmpHard) GetAdaptiv() int {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if s.Adaptiv {
+		return 1
+	}
+	return 0
+}
+func (s *SnmpHard) SetAdaptiv(value any) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if getUint32(value) == 0 {
+		s.Adaptiv = false
+	} else {
+		s.Adaptiv = true
+	}
+}
+func (s *SnmpHard) SetBlockVPU(value any) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	s.BlockVPU = false
+	if getUint32(value) == 1 {
+		s.BlockVPU = true
+	}
+}
+func (s *SnmpHard) getBlockVPU() int {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+	if s.BlockVPU {
+		return 1
+	}
+	return 0
 }
 
 func (s *SnmpHard) Update() {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	s.StateHard = hardware.GetStateHard()
 	if s.LastVPU && !s.StateHard.VPU {
 		exitSpesial = true
@@ -29,6 +69,8 @@ func (s *SnmpHard) Update() {
 }
 
 func (s *SnmpHard) GetStatus() int {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	if !s.StateHard.Connect {
 		return 0
 	}
@@ -52,6 +94,8 @@ func (s *SnmpHard) GetStatus() int {
 	return 2
 }
 func (s *SnmpHard) GetSource() int {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	if s.StateHard.VPU {
 		return 12
 	}
@@ -70,6 +114,8 @@ func (s *SnmpHard) GetSource() int {
 	return 10
 }
 func (s *SnmpHard) GetState() int {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	if autonom {
 		return 6
 	}
@@ -91,6 +137,8 @@ func (s *SnmpHard) GetState() int {
 	return 0
 }
 func (s *SnmpHard) GetPlanInteger() int {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	if s.StateHard.VPU {
 		return 15
 	}
@@ -131,6 +179,8 @@ func (s *SnmpHard) GetPlan() agent.Unsigned32 {
 	return agent.Unsigned32(s.GetPlanInteger())
 }
 func (s *SnmpHard) GetPhaseInteger() int {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	if s.StateHard.Phase == 0 {
 		// КК
 		return 0
@@ -173,6 +223,8 @@ func (s *SnmpHard) GetPhase() agent.Unsigned32 {
 	return agent.Unsigned32(s.GetPhaseInteger())
 }
 func (s *SnmpHard) GetPromtaktInteger() int {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	if s.StateHard.Phase == 255 {
 		//Промтакт
 		return 1
@@ -205,6 +257,8 @@ func getCount32(value any) agent.Counter32 {
 }
 
 func (s *SnmpHard) GetSignalGroup() string {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
 	res := make([]byte, 0)
 	var b byte = 0
 
