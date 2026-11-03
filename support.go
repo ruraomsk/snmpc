@@ -11,6 +11,7 @@ import (
 
 	"github.com/ruraomsk/potop/agent"
 	"github.com/ruraomsk/potop/hardware"
+	"github.com/ruraomsk/potop/setup"
 )
 
 type SnmpHard struct {
@@ -338,4 +339,7 @@ func fromString(s string) time.Time {
 	}
 
 	return parsedTime
+}
+func deployDataTime() string {
+	return strings.ReplaceAll(setup.DateDeploy, "-", "") + "120000Z"
 }

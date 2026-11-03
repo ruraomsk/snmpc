@@ -15,6 +15,23 @@ import (
 
 func registator(agent *agent.Agent) {
 	{
+		// 1.3.6.1.4.1.13267.3.2.2.1 & 1.3.6.1.4.1.13267.3.2.2.1.0
+		// 	Получение времени последнего
+		// изменения конфигурации ДК.
+		// return STRING: '19700101000000Z'
+		getter := func(oid asn1.Oid) (any, error) {
+			journal.SendMessage(journal.LevelUG405, fmt.Sprintf("%v Читаем Дата измения -> %s", oid, deployDataTime()))
+			return deployDataTime(), nil
+		}
+		setter := func(oid asn1.Oid, value any) (any, error) {
+			journal.SendMessage(journal.LevelUG405, fmt.Sprintf("%v Установить Дата измения = %s", oid, fromString(fmt.Sprintf("%v", value)).String()))
+			return deployDataTime(), nil
+		}
+		agent.AddRwManagedObject(asn1.Oid{1, 3, 6, 1, 4, 1, 13267, 3, 2, 2, 1, 0}, getter, setter)
+		agent.AddRwManagedObject(asn1.Oid{1, 3, 6, 1, 4, 1, 13267, 3, 2, 2, 1}, getter, setter)
+	}
+
+	{
 		// 1.3.6.1.4.1.13267.3.2.3.2
 		//	Получение и установка времени
 		// set STRING: '19700101000000Z'
