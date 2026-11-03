@@ -14,6 +14,28 @@ import (
 )
 
 func registator(agent *agent.Agent) {
+	{
+		// 1.3.6.1.4.1.13267.3.2.3.2
+		//	Получение и установка времени
+		// set STRING: '19700101000000Z'
+		// return STRING: '19700101000000Z'
+		getter := func(oid asn1.Oid) (any, error) {
+			journal.SendMessage(journal.LevelUG405, fmt.Sprintf("%v Прочитать время -> %s", oid, toString(time.Now())))
+			return toString(time.Now()), nil
+		}
+		setter := func(oid asn1.Oid, value any) (any, error) {
+			journal.SendMessage(journal.LevelUG405, fmt.Sprintf("%v Установить время = %s", oid, fromString(fmt.Sprintf("%v", value)).String()))
+			err := SetSystemTimeFromUnix(fromString(fmt.Sprintf("%v", value)).Unix())
+			if err != nil {
+				journal.SendMessage(journal.LevelSMNP, err.Error())
+			}
+			return toString(time.Now()), nil
+		}
+
+		agent.AddRwManagedObject(asn1.Oid{1, 3, 6, 1, 4, 1, 13267, 3, 2, 3, 2, 0}, getter, setter)
+		agent.AddRwManagedObject(asn1.Oid{1, 3, 6, 1, 4, 1, 13267, 3, 2, 3, 2}, getter, setter)
+	}
+
 	// case "1.3.6.1.4.1.1618.3.3.2.2.2.0":
 	//	Сообщить колво детекторов
 	agent.AddRwManagedObject(

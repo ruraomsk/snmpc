@@ -326,3 +326,16 @@ func SetSystemTimeFromUnix(unixTime int64) error {
 
 	return nil
 }
+func toString(t time.Time) string {
+	return fmt.Sprintf("%04d%02d%02d%02d%02d%02dZ", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
+}
+func fromString(s string) time.Time {
+	const layout = "20060102150405Z"
+	// Парсим строку
+	parsedTime, err := time.Parse(layout, s)
+	if err != nil {
+		return time.Now()
+	}
+
+	return parsedTime
+}
